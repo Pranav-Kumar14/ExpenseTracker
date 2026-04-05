@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Expense
 from .forms import ExpenseForm
+from django.contrib.auth import login
+from django.contrib import messages
 from django.db.models import Sum
+from .forms import SignupForm
 
 @login_required
 def dashboard(request):
@@ -39,3 +42,14 @@ def delete_expense(request, id):
     expense = Expense.objects.get(id=id, user=request.user)
     expense.delete()
     return redirect('dashboard')
+
+def signup(request):
+    form = SignupForm(request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Account created successfully. Please login.")
+            return redirect('/accounts/login/')
+
+    return render(request, 'signup.html', {'form': form})

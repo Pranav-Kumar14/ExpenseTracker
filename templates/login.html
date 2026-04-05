@@ -1,27 +1,58 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <div class="flex items-center justify-center min-h-screen">
-    <div class="glass p-8 w-full max-w-md">
+  <div class="glass p-8 w-full max-w-md">
+    <!-- Branding -->
+    <h1 class="text-3xl font-bold text-center mb-2">Expense Tracker</h1>
+    <p class="text-gray-400 text-center mb-6 text-sm">
+      Manage your money like a pro
+    </p>
 
-        <h2 class="text-2xl font-semibold mb-6 text-center">Login</h2>
-
-        <form method="POST" class="space-y-4">
-            {% csrf_token %}
-
-            <input type="text" name="username" placeholder="Username"
-                class="w-full bg-black/30 border border-gray-600 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-
-            <input type="password" name="password" placeholder="Password"
-                class="w-full bg-black/30 border border-gray-600 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-
-            <button class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg transition">
-                Login
-            </button>
-        </form>
-
+    <!-- ERROR MESSAGE -->
+    {% if form.errors %}
+    <div
+      class="bg-red-500/20 text-red-300 p-2 rounded mb-4 text-sm text-center"
+    >
+      User not signed up or invalid credentials
     </div>
+    {% endif %} {% if messages %} {% for message in messages %}
+    <div
+      class="bg-green-500/20 text-green-300 p-2 rounded mb-4 text-sm text-center"
+    >
+      {{ message }}
+    </div>
+    {% endfor %} {% endif %}
+
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+
+      <input
+        type="text"
+        name="username"
+        placeholder="Username"
+        class="w-full bg-black/30 border border-gray-600 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+      />
+
+      <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        class="w-full bg-black/30 border border-gray-600 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+      />
+
+      <button
+        class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg transition"
+      >
+        Login
+      </button>
+    </form>
+
+    <!-- SIGNUP LINK -->
+    <p class="text-center text-gray-400 text-sm mt-4">
+      Don’t have an account?
+      <a href="/signup/" class="text-purple-400 hover:underline">Sign up</a>
+    </p>
+  </div>
 </div>
 
 {% endblock %}
