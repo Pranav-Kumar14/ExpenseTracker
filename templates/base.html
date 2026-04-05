@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Expense Tracker</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      .glass {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      input,
+      select {
+        color: white !important;
+      }
+
+      input::placeholder {
+        color: #9ca3af;
+      }
+
+      /* Autofill fix */
+      input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important;
+        -webkit-text-fill-color: white !important;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#020617] text-white"
+  >
+    <div class="flex min-h-screen">
+      {% if user.is_authenticated %}
+      <aside class="w-64 p-6 flex flex-col justify-between bg-white/5">
+        <div>
+          <h1 class="text-2xl font-bold mb-10">Expense Tracker</h1>
+
+          <nav class="space-y-4 text-lg">
+            <a href="/" class="block hover:text-purple-400">Dashboard</a>
+            <a href="/add/" class="block hover:text-purple-400">Add Expense</a>
+
+            <form action="/accounts/logout/" method="POST">
+              {% csrf_token %}
+              <button
+                class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-300 px-4 py-2 rounded-lg"
+              >
+                Logout
+              </button>
+            </form>
+          </nav>
+        </div>
+
+        <!-- CLEAR VISIBLE LOGOUT -->
+      </aside>
+      {% endif %}
+
+      <main class="flex-1 p-6 md:p-10">{% block content %}{% endblock %}</main>
+    </div>
+  </body>
+</html>
