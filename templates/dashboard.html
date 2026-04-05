@@ -1,115 +1,145 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 
 <h2 class="text-3xl font-semibold mb-6">Dashboard</h2>
 
 <!-- Top Cards -->
 <div class="grid md:grid-cols-3 gap-6 mb-8">
+  <div class="glass p-6">
+    <p class="text-gray-400 text-sm">Total Spent</p>
+    <h2 class="text-2xl font-bold">₹{{ total }}</h2>
+  </div>
 
-    <div class="glass p-6">
-        <p class="text-gray-400 text-sm">Total Spent</p>
-        <h2 class="text-2xl font-bold mt-2">₹{{ total }}</h2>
-    </div>
+  <div class="glass p-6">
+    <p class="text-gray-400 text-sm">This Month</p>
+    <h2 class="text-2xl font-bold">₹{{ monthly_total }}</h2>
+  </div>
 
-    <div class="glass p-6">
-        <p class="text-gray-400 text-sm">Transactions</p>
-        <h2 class="text-2xl font-bold mt-2">{{ expenses|length }}</h2>
-    </div>
+  <div class="glass p-6">
+    <p class="text-gray-400 text-sm">Last 7 Days</p>
+    <h2 class="text-2xl font-bold">₹{{ weekly_total }}</h2>
+  </div>
 
-    <div class="glass p-6 flex items-center justify-center">
-        <a href="/add/" class="bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-lg transition">
-            + Add Expense
-        </a>
-    </div>
+  <div class="glass p-6">
+    <p class="text-gray-400 text-sm">Top Category</p>
+    <h2 class="text-xl font-bold">{{ top_category }}</h2>
+  </div>
 
+  <div class="glass p-6">
+    <p class="text-gray-400 text-sm">Transactions</p>
+    <h2 class="text-2xl font-bold mt-2">{{ expenses|length }}</h2>
+  </div>
+
+  <div class="glass p-6 flex items-center justify-center">
+    <a
+      href="/add/"
+      class="bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-lg transition"
+    >
+      + Add Expense
+    </a>
+  </div>
 </div>
 
 <!-- Main Grid -->
 <div class="grid lg:grid-cols-2 gap-8">
+  <!-- Table -->
+  <div class="glass p-6">
+    <h3 class="mb-4 text-lg font-semibold">Recent Expenses</h3>
 
-    <!-- Table -->
-    <div class="glass p-6">
-        <h3 class="mb-4 text-lg font-semibold">Recent Expenses</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-gray-400 border-b border-gray-700">
+          <tr>
+            <th class="text-left py-2">Title</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th></th>
+          </tr>
+        </thead>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="text-gray-400 border-b border-gray-700">
-                    <tr>
-                        <th class="text-left py-2">Title</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th></th>
-                    </tr>
-                </thead>
+        <tbody>
+          {% for expense in expenses %}
+          <tr class="border-b border-gray-800 hover:bg-white/5 transition">
+            <td class="py-3">{{ expense.title }}</td>
 
-                <tbody>
-                {% for expense in expenses %}
-                    <tr class="border-b border-gray-800 hover:bg-white/5 transition">
-                        <td class="py-3">{{ expense.title }}</td>
+            <td>
+              <span
+                class="px-3 py-1 rounded-full text-xs {% if expense.category == 'Food' %}bg-green-500/20 text-green-300 {% elif expense.category == 'Rent' %}bg-red-500/20 text-red-300 {% elif expense.category == 'Transport' %}bg-blue-500/20 text-blue-300 {% elif expense.category == 'Entertainment' %}bg-purple-500/20 text-purple-300 {% else %}bg-gray-500/20 text-gray-300{% endif %}"
+              >
+                {{ expense.category }}
+              </span>
+            </td>
 
-                        <td>
-                            <span class="px-3 py-1 rounded-full text-xs
-                                {% if expense.category == 'Food' %}bg-green-500/20 text-green-300
-                                {% elif expense.category == 'Rent' %}bg-red-500/20 text-red-300
-                                {% elif expense.category == 'Transport' %}bg-blue-500/20 text-blue-300
-                                {% elif expense.category == 'Entertainment' %}bg-purple-500/20 text-purple-300
-                                {% else %}bg-gray-500/20 text-gray-300{% endif %}
-                            ">
-                                {{ expense.category }}
-                            </span>
-                        </td>
+            <td class="font-medium">₹{{ expense.amount }}</td>
 
-                        <td class="font-medium">₹{{ expense.amount }}</td>
-
-                        <td>
-                            <a href="/delete/{{ expense.id }}/" 
-                               class="text-red-400 hover:text-red-300 text-xs">
-                               Delete
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            <td>
+              <a
+                href="/delete/{{ expense.id }}/"
+                class="text-red-400 hover:text-red-300 text-xs"
+              >
+                Delete
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <!-- Chart -->
-    <div class="glass p-6">
-        <h3 class="mb-4 text-lg font-semibold">Spending Breakdown</h3>
-        <canvas id="chart"></canvas>
-    </div>
+  <!-- Chart -->
+  <div class="glass p-6">
+    <h3 class="mb-4 text-lg font-semibold">Spending Breakdown</h3>
+    <canvas id="chart"></canvas>
+  </div>
+</div>
 
+<div class="glass p-6 mt-6">
+    <h3 class="mb-4 text-lg font-semibold">Last 7 Days Trend</h3>
+    <canvas id="lineChart"></canvas>
 </div>
 
 <script>
-const ctx = document.getElementById('chart');
-
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: {{ labels|safe }},
-        datasets: [{
-            data: {{ data|safe }},
-            backgroundColor: [
-                '#22c55e',
-                '#ef4444',
-                '#3b82f6',
-                '#a855f7',
-                '#f59e0b',
-                '#6b7280'
-            ]
-        }]
-    },
-    options: {
-        plugins: {
-            legend: {
-                labels: { color: "white" }
+    /* Doughnut */
+    new Chart(document.getElementById('chart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                data: {{ data|safe }},
+                backgroundColor: [
+                    '#22c55e',
+                    '#ef4444',
+                    '#3b82f6',
+                    '#a855f7',
+                    '#f59e0b',
+                    '#6b7280'
+                ]
+            }]
+        }
+    });
+    
+    /* Line Chart */
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: {{ days|safe }},
+            datasets: [{
+                label: 'Daily Spending',
+                data: {{ daily_totals|safe }},
+                borderColor: '#a855f7',
+                tension: 0.3
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: "white" } }
+            },
+            scales: {
+                x: { ticks: { color: "white" } },
+                y: { ticks: { color: "white" } }
             }
         }
-    }
-});
-</script>
+    });
+    </script>
 
 {% endblock %}
