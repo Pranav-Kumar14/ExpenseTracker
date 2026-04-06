@@ -3,7 +3,7 @@
 <h2 class="text-3xl font-semibold mb-6">Dashboard</h2>
 
 <!-- Top Cards -->
-<div class="grid md:grid-cols-3 gap-6 mb-8">
+<div class="grid md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
   <div class="glass p-6">
     <p class="text-gray-400 text-sm">Total Spent</p>
     <h2 class="text-2xl font-bold">₹{{ total }}</h2>
@@ -26,26 +26,87 @@
 
   <div class="glass p-6">
     <p class="text-gray-400 text-sm">Transactions</p>
-    <h2 class="text-2xl font-bold mt-2">{{ expenses|length }}</h2>
+    <h2 class="text-2xl font-bold">{{ expenses|length }}</h2>
   </div>
 
-  <div class="glass p-6 flex items-center justify-center">
-    <a
-      href="/add/"
-      class="bg-purple-600 hover:bg-purple-700 px-5 py-3 rounded-lg transition"
-    >
-      + Add Expense
-    </a>
+  <!-- 💰 MONTHLY BUDGET -->
+  <div class="glass p-6">
+    <p class="text-gray-400 text-sm">Monthly Budget</p>
+
+    <h2 class="text-lg font-bold">₹{{ monthly_total }} / ₹{{ budget }}</h2>
+
+    <div class="w-full bg-gray-700 rounded-full h-3 mt-3">
+      <div
+        class="bg-purple-500 h-3 rounded-full"
+        style="width: {{ percent_used }}%"
+      ></div>
+    </div>
+
+    <p class="text-sm mt-2 text-gray-400">{{ percent_used }}% used</p>
+
+    <!-- 🔥 SET BUDGET -->
+    <form method="POST" action="/set-budget/" class="mt-3 flex gap-2">
+      {% csrf_token %}
+      <input
+        type="number"
+        name="amount"
+        placeholder="Set budget"
+        class="w-full bg-black/30 text-white p-1 rounded text-sm"
+      />
+      <button class="bg-purple-600 px-2 rounded text-xs">Save</button>
+    </form>
   </div>
 </div>
+
+<!-- 🔍 FILTERS -->
+<div class="glass p-4 mb-6">
+  <form method="GET" class="flex flex-wrap gap-3">
+    <input
+      type="text"
+      name="q"
+      placeholder="Search..."
+      class="bg-black/30 p-2 rounded text-sm"
+    />
+
+    <select name="category" class="bg-black/30 p-2 rounded text-sm">
+      <option value="">All Categories</option>
+      <option>Food</option>
+      <option>Rent</option>
+      <option>Transport</option>
+      <option>Entertainment</option>
+      <option>Utilities</option>
+      <option>Other</option>
+    </select>
+
+    <input type="date" name="start" class="bg-black/30 p-2 rounded text-sm" />
+    <input type="date" name="end" class="bg-black/30 p-2 rounded text-sm" />
+
+    <button class="bg-purple-600 px-4 py-2 rounded text-sm">Filter</button>
+  </form>
+</div>
+
+<!-- Show All Toggle -->
+<!-- Show All FIXED -->
+{% if show_all %}
+<a href="?" class="mb-3 inline-block bg-gray-700 px-3 py-1 rounded text-sm">
+  Show Less
+</a>
+{% else %}
+<a
+  href="?show_all=true"
+  class="mb-3 inline-block bg-gray-700 px-3 py-1 rounded text-sm"
+>
+  Show All
+</a>
+{% endif %}
 
 <!-- Main Grid -->
 <div class="grid lg:grid-cols-2 gap-8">
   <!-- Table -->
-  <div class="glass p-6">
-    <h3 class="mb-4 text-lg font-semibold">Recent Expenses</h3>
+  <div id="tableContainer" class="glass p-6">
+    <h3 class="mb-4 text-lg font-semibold">Expenses</h3>
 
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto max-h-80 overflow-y-auto">
       <table class="w-full text-sm">
         <thead class="text-gray-400 border-b border-gray-700">
           <tr>
@@ -86,60 +147,68 @@
     </div>
   </div>
 
-  <!-- Chart -->
+  <!-- Doughnut Chart -->
   <div class="glass p-6">
     <h3 class="mb-4 text-lg font-semibold">Spending Breakdown</h3>
     <canvas id="chart"></canvas>
   </div>
 </div>
 
+<!-- Line Chart -->
 <div class="glass p-6 mt-6">
-    <h3 class="mb-4 text-lg font-semibold">Last 7 Days Trend</h3>
-    <canvas id="lineChart"></canvas>
+  <h3 class="mb-4 text-lg font-semibold">Last 7 Days Trend</h3>
+  <canvas id="lineChart"></canvas>
+</div>
+
+<!-- Bar Chart -->
+<div class="glass p-6 mt-6">
+  <h3 class="mb-4 text-lg font-semibold">Monthly Spending</h3>
+  <canvas id="barChart"></canvas>
 </div>
 
 <script>
-    /* Doughnut */
-    new Chart(document.getElementById('chart'), {
-        type: 'doughnut',
-        data: {
-            labels: {{ labels|safe }},
-            datasets: [{
-                data: {{ data|safe }},
-                backgroundColor: [
-                    '#22c55e',
-                    '#ef4444',
-                    '#3b82f6',
-                    '#a855f7',
-                    '#f59e0b',
-                    '#6b7280'
-                ]
-            }]
-        }
-    });
-    
-    /* Line Chart */
-    new Chart(document.getElementById('lineChart'), {
-        type: 'line',
-        data: {
-            labels: {{ days|safe }},
-            datasets: [{
-                label: 'Daily Spending',
-                data: {{ daily_totals|safe }},
-                borderColor: '#a855f7',
-                tension: 0.3
-            }]
-        },
-        options: {
-            plugins: {
-                legend: { labels: { color: "white" } }
-            },
-            scales: {
-                x: { ticks: { color: "white" } },
-                y: { ticks: { color: "white" } }
-            }
-        }
-    });
-    </script>
+
+  /* Doughnut */
+  new Chart(document.getElementById('chart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ labels|safe }},
+      datasets: [{
+        data: {{ data|safe }},
+        backgroundColor: [
+          '#22c55e','#ef4444','#3b82f6',
+          '#a855f7','#f59e0b','#6b7280'
+        ]
+      }]
+    }
+  });
+
+  /* Line */
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: {{ days|safe }},
+      datasets: [{
+        label: 'Daily Spending',
+        data: {{ daily_totals|safe }},
+        borderColor: '#a855f7',
+        tension: 0.3
+      }]
+    }
+  });
+
+  /* Bar */
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ months|safe }},
+      datasets: [{
+        label: 'Monthly Spending',
+        data: {{ monthly_totals|safe }},
+        backgroundColor: '#6366f1'
+      }]
+    }
+  });
+</script>
 
 {% endblock %}

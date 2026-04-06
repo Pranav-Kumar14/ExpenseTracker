@@ -17,3 +17,15 @@ class Expense(models.Model):
     date = models.DateField()
     def __str__(self):
         return self.title
+
+class Budget(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    month = models.IntegerField()
+    year = models.IntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    class Meta:
+        unique_together = ('user', 'month', 'year')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.month}/{self.year}"
