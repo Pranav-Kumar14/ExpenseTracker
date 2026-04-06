@@ -11,6 +11,9 @@ It allows users to manage their expenses, visualize spending patterns, and track
 - Add Expenses
 - Dashboard with Total Spending
 - Doughnut Chart (Category-wise spending using Chart.js)
+- Monthly Bar-Chart
+- Filtering Expenses
+- Budget Alerts
 - Delete Expenses
 - User-specific data (each user sees only their expenses)
 - Modern UI with Tailwind CSS (Glassmorphism Design)
@@ -85,16 +88,15 @@ User.objects.get(username="your_username").delete()
 
 ## Future Enhancements
 
-- Edit Expenses  
-- Filters (Date, Category)  
-- Monthly Trends Chart  
+- Edit Expenses    
 - Export to CSV/PDF  
-- Budget Alerts  
 
 ---
 
 ## Author
 
-Pranav Kumar  
+Pranav Kumar
+Safin Joash Xavier
+Gargi Pant
 
 ---

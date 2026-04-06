@@ -13,7 +13,6 @@ from .forms import ExpenseForm, SignupForm
 def dashboard(request):
     expenses = Expense.objects.filter(user=request.user)
 
-    # ================= FILTERS =================
     query = request.GET.get('q')
     category = request.GET.get('category')
     start_date = request.GET.get('start')
@@ -28,7 +27,6 @@ def dashboard(request):
     if start_date and end_date:
         expenses = expenses.filter(date__range=[start_date, end_date])
 
-    # ================= SHOW ALL FIX =================
     show_all = request.GET.get('show_all')
 
     if show_all:
@@ -36,7 +34,6 @@ def dashboard(request):
     else:
         expenses = expenses.order_by('-date')[:5]
 
-    # ================= BASIC STATS =================
     total = Expense.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
 
     current_month = datetime.now().month
@@ -56,7 +53,6 @@ def dashboard(request):
         date__gte=last_7_days
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # ================= CATEGORY =================
     category_data = monthly_expenses.values('category').annotate(total=Sum('amount'))
 
     labels = [item['category'] for item in category_data]
@@ -65,7 +61,6 @@ def dashboard(request):
     top_category = category_data.order_by('-total').first()
     top_category_name = top_category['category'] if top_category else "None"
 
-    # ================= DAILY =================
     days = []
     daily_totals = []
 
@@ -79,7 +74,6 @@ def dashboard(request):
         days.append(day.strftime("%d %b"))
         daily_totals.append(float(total_day))
 
-    # ================= MONTHLY BAR =================
     monthly_data = defaultdict(float)
 
     for exp in Expense.objects.filter(user=request.user):
@@ -89,7 +83,6 @@ def dashboard(request):
     months = list(monthly_data.keys())
     monthly_totals = list(monthly_data.values())
 
-    # ================= BUDGET (MONTHLY) =================
     budget_obj, _ = Budget.objects.get_or_create(
         user=request.user,
         month=current_month,
